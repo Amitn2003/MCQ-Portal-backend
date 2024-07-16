@@ -83,39 +83,39 @@ const getQuestions = asyncHandler(async (req, res) => {
 // @desc    Update a question
 // @route   PUT /api/questions/:id
 // @access  Private/Admin
-const updateQuestion = asyncHandler(async (req, res) => {
-    const questionData = questionSchema.parse(req.body);
-    const question = await Question.findById(req.params.id);
+// const updateQuestion = asyncHandler(async (req, res) => {
+//     const questionData = questionSchema.parse(req.body);
+//     const question = await Question.findById(req.params.id);
 
-    if (question) {
-        question.category = questionData.category;
-        question.question = questionData.question;
-        question.options = questionData.options;
-        question.correctAnswer = questionData.correctAnswer;
-        question.explanation = questionData.explanation;
+//     if (question) {
+//         question.category = questionData.category;
+//         question.question = questionData.question;
+//         question.options = questionData.options;
+//         question.correctAnswer = questionData.correctAnswer;
+//         question.explanation = questionData.explanation;
 
-        const updatedQuestion = await question.save();
-        res.json(updatedQuestion);
-    } else {
-        res.status(404);
-        throw new Error('Question not found');
-    }
-});
+//         const updatedQuestion = await question.save();
+//         res.json(updatedQuestion);
+//     } else {
+//         res.status(404);
+//         throw new Error('Question not found');
+//     }
+// });
 
 // @desc    Delete a question
 // @route   DELETE /api/questions/:id
 // @access  Private/Admin
-const deleteQuestion = asyncHandler(async (req, res) => {
-    const question = await Question.findById(req.params.id);
+// const deleteQuestion = asyncHandler(async (req, res) => {
+//     const question = await Question.findById(req.params.id);
 
-    if (question) {
-        await Question.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Question removed' });
-    } else {
-        res.status(404);
-        throw new Error('Question not found');
-    }
-});
+//     if (question) {
+//         await Question.findByIdAndDelete(req.params.id);
+//         res.json({ message: 'Question removed' });
+//     } else {
+//         res.status(404);
+//         throw new Error('Question not found');
+//     }
+// });
 // @desc    Get random questions
 // @route   GET /api/questions/random/:totalQs
 // @access  Private
@@ -127,6 +127,76 @@ const getRandomQuestions = asyncHandler(async (req, res) => {
     console.log("Get random qs", questions)
     res.json(questions);
 });
+
+
+// @desc    Add a question
+// @route   POST /api/questions
+// @access  Private/Admin
+// const addQuestion = asyncHandler(async (req, res) => {
+//     const { category, question, options, correctAnswer, explanation } = req.body;
+
+//     const newQuestion = new Question({
+//         category,
+//         question,
+//         options,
+//         correctAnswer,
+//         explanation,
+//     });
+
+//     const createdQuestion = await newQuestion.save();
+//     res.status(201).json(createdQuestion);
+// });
+
+
+
+
+
+
+// @desc    Update a question
+// @route   PUT /api/questions/:id
+// @access  Private/Admin
+const updateQuestion = asyncHandler(async (req, res) => {
+    const { category, question, options, correctAnswer, explanation } = req.body;
+
+    const questionToUpdate = await Question.findById(req.params.id);
+
+    if (questionToUpdate) {
+        questionToUpdate.category = category || questionToUpdate.category;
+        questionToUpdate.question = question || questionToUpdate.question;
+        questionToUpdate.options = options || questionToUpdate.options;
+        questionToUpdate.correctAnswer = correctAnswer || questionToUpdate.correctAnswer;
+        questionToUpdate.explanation = explanation || questionToUpdate.explanation;
+
+        const updatedQuestion = await questionToUpdate.save();
+        res.json(updatedQuestion);
+    } else {
+        res.status(404);
+        throw new Error('Question not found');
+    }
+});
+
+
+
+
+
+// @desc    Delete a question
+// @route   DELETE /api/questions/:id
+// @access  Private/Admin
+const deleteQuestion = asyncHandler(async (req, res) => {
+    const questionToDelete = await Question.findById(req.params.id);
+
+    if (questionToDelete) {
+        await questionToDelete.remove();
+        res.json({ message: 'Question removed' });
+    } else {
+        res.status(404);
+        throw new Error('Question not found');
+    }
+});
+
+
+
+
 
 module.exports = {
     addQuestion,

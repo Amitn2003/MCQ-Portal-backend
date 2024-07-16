@@ -5,6 +5,8 @@ const {
     reportQuestion,
     getReportedQuestions,
     updateReportedQuestionStatus,
+    updateReportedQuestion,
+    deleteReportedQuestion
 } = require('../controllers/reportedQuestionController');
 const { protect , admin} = require('../middlewares/authMiddleware');
 
@@ -14,7 +16,8 @@ const { protect , admin} = require('../middlewares/authMiddleware');
 
 router.route('/').post(protect, reportQuestion)
 .get(protect, admin, getReportedQuestions);
-router.route('/:id').put(protect, admin, updateReportedQuestionStatus);
+router.route('/:id').put(protect, admin, updateReportedQuestion)
+.delete(protect, admin, deleteReportedQuestion);
 // router.route('/').post(protect, reportQuestion);
 
 module.exports = router;
