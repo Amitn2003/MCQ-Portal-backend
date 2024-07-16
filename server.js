@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const questionRoutes = require('./routes/questionRoutes');
 const userRoutes = require('./routes/userRoutes');
 const examResultRoutes = require('./routes/examResultRoutes');
+const analyticsRoutes = require('./routes/analyticsRoute'); 
 const errorHandler = require('./middlewares/errorHandler');
 
 dotenv.config();
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/examResults', examResultRoutes);
+app.use('/api/analytics', analyticsRoutes); 
 
 app.use(errorHandler);
 
