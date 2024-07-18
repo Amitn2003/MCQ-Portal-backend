@@ -15,6 +15,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    address : {
+        type: String,
+    },
+    college : {
+        type: String,
+    },
+    phone : {
+        type : String,
+    },
     isAdmin: {
         type: Boolean,
         default: false,

@@ -41,7 +41,8 @@ const reportQuestion = asyncHandler(async (req, res) => {
 const getReportedQuestions = asyncHandler(async (req, res) => {
     const reportedQuestions = await ReportedQuestion.find({})
         .populate('question', 'question options correctAnswer explanation')
-        .populate('user', 'name email');
+        .populate('user', 'name email')
+        .sort({ createdAt: -1 });
 
     res.json(reportedQuestions);
 });

@@ -39,7 +39,9 @@ const addExamResult = asyncHandler(async (req, res) => {
 // @route   GET /api/examResults
 // @access  Private
 const getUserExamResults = asyncHandler(async (req, res) => {
-    const examResults = await ExamResult.find({ user: req.user._id }).populate('questions.question');
+    const examResults = await ExamResult.find({ user: req.user._id })
+    .populate('questions.question')
+    .sort({ createdAt: -1 });
 
     res.json(examResults);
 });

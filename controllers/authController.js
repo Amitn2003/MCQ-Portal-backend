@@ -18,54 +18,74 @@ const loginSchema = z.object({
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password } = registerSchema.parse(req.body);
-    console.log("Rgister user control", { name, email, password } )
-    const userExists = await User.findOne({ email });
+    try {
+        // const { name, email, password } = registerSchema.parse(req.body);
+        const { name, email, password, address, college, phone } = req.body;
+        // console.log("Rgister user control", { name, email, password } )
+        const userExists = await User.findOne({ email });
 
-    if (userExists) {
-        res.status(400);
-        throw new Error('User already exists');
-    }
+        if (userExists) {
+            res.status(400).json({ message: 'User with this email already exists' });
+            throw new Error('User already exists');
+        }
 
-    const user = await User.create({
-        name,
-        email,
-        password,
-    });
-
-    if (user) {
-        res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            isAdmin : user.isAdmin,
-            token: generateToken(user._id),
+        const user = await User.create({
+            name,
+            email,
+            password,
+            address,
+            college,
+            phone,
         });
-    } else {
-        res.status(400);
-        throw new Error('Invalid user data');
+
+        if (user) {
+            res.status(201).json({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                address: user.address,
+                college: user.college,
+                phone: user.phone,
+                isAdmin: user.isAdmin,
+                token: generateToken(user._id),
+                message: 'User registered successfully',
+            });
+        } else {
+            res.status(400).json({ message: 'Invalid user data' });
+            throw new Error('Invalid user data');
+        }
+    } catch (error) {
+        // Catch any errors that occur during registration
+        res.status(500).json({ message: error.message });
     }
 });
 
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
 // @access  Public
-const authUser = asyncHandler(async (req, res) => {
-    const { email, password } = loginSchema.parse(req.body);
+const authUser = asyncHandler(async (req, res) => {     // Login user
+    try {
+        const { email, password } = loginSchema.parse(req.body);
 
-    const user = await User.findOne({ email });
+        const user = await User.findOne({ email });
 
-    if (user && (await user.matchPassword(password))) {
-        res.json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            isAdmin : user.isAdmin,
-            token: generateToken(user._id),
-        });
-    } else {
-        res.status(401);
-        throw new Error('Invalid email or password');
+        if (user && (await user.matchPassword(password))) {
+            res.json({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                isAdmin: user.isAdmin,
+                college: user.college,
+                address: user.address,
+                phone: user.phone,
+                token: generateToken(user._id),
+                message: 'User logged in successfully',
+            });
+        } else {
+            res.status(401).json({ message: 'Invalid email or password' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 });
 
