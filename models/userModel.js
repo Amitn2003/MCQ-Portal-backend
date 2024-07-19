@@ -24,10 +24,21 @@ const userSchema = new mongoose.Schema({
     phone : {
         type : String,
     },
+    isPremium: {
+        type: Boolean,
+        required: true,
+        default: false,
+    },
     isAdmin: {
         type: Boolean,
         default: false,
     },
+    examAttempts: [
+        {
+            date: { type: Date },
+            count: { type: Number},
+        },
+    ],
 }, {
     timestamps: true,
 });
@@ -40,7 +51,6 @@ userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
         next();
     }
-
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });

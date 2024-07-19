@@ -47,6 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
                 college: user.college,
                 phone: user.phone,
                 isAdmin: user.isAdmin,
+                isPremium : user.isPremium ,
                 token: generateToken(user._id),
                 message: 'User registered successfully',
             });
@@ -78,6 +79,7 @@ const authUser = asyncHandler(async (req, res) => {     // Login user
                 college: user.college,
                 address: user.address,
                 phone: user.phone,
+                isPremium : user.isPremium ,
                 token: generateToken(user._id),
                 message: 'User logged in successfully',
             });

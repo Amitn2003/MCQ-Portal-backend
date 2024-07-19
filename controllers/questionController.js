@@ -50,7 +50,7 @@ const getQuestions = asyncHandler(async (req, res) => {
                 { $match: { category: category } }, // Match questions of the specified category
                 { $sample: { size: totalQuestions } } // Randomly sample 'totalQuestions' number of questions
             ]);
-            console.log("Qs ",questions)
+            // console.log("Qs ",questions)
         } else {
             // Fetch all questions regardless of category
             questions = await Question.aggregate([

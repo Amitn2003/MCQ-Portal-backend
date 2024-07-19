@@ -110,11 +110,11 @@ const updateUser = asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
 
     if (user) {
-        const { name, email, isAdmin } = userUpdateSchema.parse(req.body);
-
-        user.name = name || user.name;
-        user.email = email || user.email;
-        user.isAdmin = isAdmin;
+        // const { name, email, isAdmin } = userUpdateSchema.parse(req.body);
+        user.name = req.body.name || user.name;
+        user.email = req.body.email || user.email;
+        user.isAdmin = req.body.isAdmin !== undefined ? req.body.isAdmin : user.isAdmin;
+        user.isPremium = req.body.isPremium !== undefined ? req.body.isPremium : user.isPremium;
 
         const updatedUser = await user.save();
 
@@ -123,9 +123,10 @@ const updateUser = asyncHandler(async (req, res) => {
             name: updatedUser.name,
             email: updatedUser.email,
             isAdmin: updatedUser.isAdmin,
+            isPremium: updatedUser.isPremium,
         });
     } else {
-        res.status(404);
+        res.status(404).json({"message" : "Failed to update user."});
         throw new Error('User not found');
     }
 });
