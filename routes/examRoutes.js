@@ -1,7 +1,18 @@
 const express = require('express');
 const { protect, admin } = require('../middlewares/authMiddleware');
-const { createExam, getExams, getExamById, deleteExam, submitExam, getUserExams, getAvailableExams } = require('../controllers/examController');
+const { createExam, 
+    getExams, 
+    getExamById, 
+    deleteExam, 
+    submitExam, 
+    getUserExams, 
+    getAvailableExams,
+    getUserExamAttemptsByDate, } = require('../controllers/examController');
 const router = express.Router();
+
+
+
+
 
 router.route('/')
     .post(protect, admin, createExam)
@@ -21,5 +32,10 @@ router.route('/:id/submit')
 
 router.route('/user/:userId')
     .get(protect,  getUserExams);
+
+
+
+router.route('/user/:userId/attempts')
+    .get(protect, getUserExamAttemptsByDate);
 
 module.exports = router;

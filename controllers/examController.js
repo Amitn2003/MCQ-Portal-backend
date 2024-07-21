@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const Exam = require('../models/examModel');
 const User = require('../models/userModel');
 const ExamResult2 = require('../models/examResultModel2');
+const ExamResult = require("../models/examResultModel")
 const Question = require("../models/questionModel")
 // @desc    Create a new exam
 // @route   POST /api/exams
@@ -154,6 +155,61 @@ const getUserExams = asyncHandler(async (req, res) => {
 //     }
 // });
 
+
+
+
+// @desc    Get user's exam attempts by date
+// @route   GET /api/exams/user/:userId/attempts
+// @access  Private
+const getUserExamAttemptsByDate = asyncHandler(async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        const results = await ExamResult.find({ user: userId });
+
+        const attemptsByDate = results.reduce((acc, result) => {
+            const date = result.createdAt.toISOString().split('T')[0];
+            acc[date] = (acc[date] || 0) + 1;
+            return acc;
+        }, {});
+
+        res.json(attemptsByDate);
+    } catch (error) {
+        res.status(404).json({ message: 'Exam attempts not found' });
+        throw new Error('Exam attempts not found');
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
     createExam,
     getExams,
@@ -162,4 +218,5 @@ module.exports = {
     submitExam,
     getUserExams,
     getAvailableExams,
+    getUserExamAttemptsByDate,
 };
