@@ -30,12 +30,12 @@ router.route('/:id')
 router.route('/:id/submit')
     .post(protect, submitExam);
 
+router.route('/user/:userId/attempts')
+    .get(protect, getUserExamAttemptsByDate);
+        
+        
 router.route('/user/:userId')
     .get(protect,  getUserExams);
 
-
-
-router.route('/user/:userId/attempts')
-    .get(protect, getUserExamAttemptsByDate);
 
 module.exports = router;
