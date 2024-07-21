@@ -4,15 +4,20 @@ const generateToken = require('../utils/generateToken');
 const { z } = require('zod');
 
 const registerSchema = z.object({
-    name: z.string().min(1),
-    email: z.string().email(),
-    password: z.string().min(6),
-});
-
-const loginSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(6),
-});
+    name: z.string()
+      .min(4, { message: "Name must be at least 4 characters long" }),
+    email: z.string()
+      .email({ message: "Invalid email address" }),
+    password: z.string()
+      .min(6, { message: "Password must be at least 6 characters long" }),
+  });
+  
+  const loginSchema = z.object({
+    email: z.string()
+      .email({ message: "Invalid email address" }),
+    password: z.string()
+      .min(1, { message: "Password is required" }),
+  });
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -20,7 +25,7 @@ const loginSchema = z.object({
 const registerUser = asyncHandler(async (req, res) => {
     try {
         // const { name, email, password } = registerSchema.parse(req.body);
-        const { name, email, password, address, college, phone } = req.body;
+        const { name, email, password, address, college, phone } = registerSchema.parse(req.body);
         // console.log("Rgister user control", { name, email, password } )
         const userExists = await User.findOne({ email });
 
@@ -52,12 +57,24 @@ const registerUser = asyncHandler(async (req, res) => {
                 message: 'User registered successfully',
             });
         } else {
-            res.status(400).json({ message: 'Invalid user data' });
+            res.status(400).json({ message: 'Failed to register user. Please try again' });
             throw new Error('Invalid user data');
         }
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            // Handle Zod validation errors
+            const issues = error.issues.map(issue => ({
+                path: issue.path.join('.'),
+                message: issue.message
+            }));
+            res.status(400).json({
+                message: 'Validation failed',
+                issues
+            });
+        } else {
         // Catch any errors that occur during registration
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message || 'Server error' });
+        }
     }
 });
 
@@ -87,6 +104,17 @@ const authUser = asyncHandler(async (req, res) => {     // Login user
             res.status(401).json({ message: 'Invalid email or password' });
         }
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            // Handle Zod validation errors
+            const issues = error.issues.map(issue => ({
+                path: issue.path.join('.'),
+                message: issue.message
+            }));
+            res.status(400).json({
+                message: 'Validation failed',
+                issues
+            });
+        }
         res.status(500).json({ message: error.message });
     }
 });
