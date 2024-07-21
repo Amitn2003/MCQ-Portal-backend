@@ -53,7 +53,23 @@ const getExams = asyncHandler(async (req, res) => {
 // @route   GET /api/exams/:id
 // @access  Private
 const getExamById = asyncHandler(async (req, res) => {
-    const exam = await Exam.findById(req.params.id).populate('questions');
+    // const exam = await Exam.findById(req.params.id).populate('questions');
+
+    // if (exam) {
+    //     res.json(exam);
+    // } else {
+    //     res.status(404);
+    //     throw new Error('Exam not found');
+    // }
+    const { id } = req.params;
+    console.log(id)
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400);
+        throw new Error('Invalid exam ID');
+    }
+
+    const exam = await Exam.findById(id).populate('questions');
 
     if (exam) {
         res.json(exam);
@@ -62,6 +78,33 @@ const getExamById = asyncHandler(async (req, res) => {
         throw new Error('Exam not found');
     }
 });
+
+
+
+// @desc    Update exam
+// @route   PUT /api/exams/:id
+// @access  Private/Admin
+const updateExam = asyncHandler(async (req, res) => {
+    const { title, category, questions, dueDate } = req.body;
+
+    const exam = await Exam.findById(req.params.id);
+
+    if (exam) {
+        exam.title = title;
+        exam.category = category;
+        exam.questions = questions;
+        exam.dueDate = dueDate;
+
+        const updatedExam = await exam.save();
+        res.json(updatedExam);
+    } else {
+        res.status(404);
+        throw new Error('Exam not found');
+    }
+});
+
+
+
 
 // @desc    Delete an exam
 // @route   DELETE /api/exams/:id
@@ -95,6 +138,15 @@ const submitExam = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Exam due date has passed');
     }
+
+    const existingResult = await ExamResult2.findOne({ user: req.user._id, exam: req.params.id });
+
+    if (existingResult) {
+        res.status(400);
+        throw new Error('You have already attempted this exam');
+    }
+
+
 
     const result = new ExamResult2({
         user: req.user._id,
@@ -183,7 +235,22 @@ const getUserExamAttemptsByDate = asyncHandler(async (req, res) => {
 
 
 
+const getAllUsersResults = asyncHandler(async (req, res) => {
+    try {
+        
+        const results = await ExamResult2.find({})
+            .populate('user', 'name email')
+            .populate('exam');
 
+        for (let result of results) {
+            result.exam.questions = await Question.find({ _id: { $in: result.exam.questions } });
+        }
+
+        res.json(results);
+    } catch (error) {
+        res.status(404).json({ message: 'Results not found' });
+    }
+});
 
 
 
@@ -214,9 +281,11 @@ module.exports = {
     createExam,
     getExams,
     getExamById,
+    updateExam,
     deleteExam,
     submitExam,
     getUserExams,
     getAvailableExams,
     getUserExamAttemptsByDate,
+    getAllUsersResults,
 };

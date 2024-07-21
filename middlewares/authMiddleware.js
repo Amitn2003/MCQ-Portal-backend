@@ -15,7 +15,7 @@ const protect = asyncHandler(async (req, res, next) => {
 
             req.user = await User.findById(decoded.id).select('-password');
             
-            console.log("Auth middleware OK", req.user)
+            console.log("Auth middleware OK")
             next();
         } catch (error) {
             console.error(error);
@@ -31,6 +31,7 @@ const protect = asyncHandler(async (req, res, next) => {
 });
 
 const admin = (req, res, next) => {
+    console.log("Admin                    ")
     if (req.user && req.user.isAdmin) {
         next();
     } else {
