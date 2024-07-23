@@ -9,7 +9,8 @@ const { createExam,
     getUserExams, 
     getAvailableExams,
     getUserExamAttemptsByDate,
-    getAllUsersResults, } = require('../controllers/examController');
+    getAllUsersResults,
+    getAllUserExamResults, } = require('../controllers/examController');
 const router = express.Router();
 
 
@@ -41,7 +42,8 @@ router.route('/user/:userId/attempts')
     .get(protect, getUserExamAttemptsByDate);
         
         
-
+router.route('/results/mock')
+    .get(protect, admin, getAllUserExamResults);
 
 
 
