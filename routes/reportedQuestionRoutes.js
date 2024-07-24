@@ -18,6 +18,6 @@ router.route('/').post(protect, reportQuestion)
 .get(protect, admin, getReportedQuestions);
 router.route('/:id').put(protect, admin, updateReportedQuestion)
 .delete(protect, admin, deleteReportedQuestion);
-// router.route('/').post(protect, reportQuestion);
+
 
 module.exports = router;

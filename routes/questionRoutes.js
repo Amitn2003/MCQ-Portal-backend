@@ -18,7 +18,8 @@ router.route('/random/:totalQs').get(protect, getRandomQuestions);
 
 router.route('/')
     .post(protect, admin, addQuestion)
-    .get(protect, checkExamLimit, getQuestions);  // category will be sent through parameter
+    .get(protect, checkExamLimit, getQuestions);  
+    
 
 router.route('/:id')
     .put(protect, admin, updateQuestion)

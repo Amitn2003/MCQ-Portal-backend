@@ -27,8 +27,8 @@ const examSchema = mongoose.Schema(
         },
         
         timeTaken: {
-            type: Number, // Assuming time taken is in milliseconds or seconds
-            default: 0, // Default value can be adjusted based on your requirements
+            type: Number, 
+            default: 0, 
         },
     },
     {

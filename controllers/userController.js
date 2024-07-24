@@ -5,9 +5,9 @@ const generateToken = require('../utils/generateToken');
 
 // Schema for profile update validation
 const profileSchema = z.object({
-    name: z.string().min(1),
-    email: z.string().email(),
-    password: z.string().min(6).optional(),
+    name: z.string().min(1, { message: 'Name must be at least 1 character long' }),
+    email: z.string().email({ message: 'Invalid email format' }),
+    password: z.string().min(4, { message: 'Password must be at least 4 characters long' }).optional(),
 });
 
 // Schema for user update by admin

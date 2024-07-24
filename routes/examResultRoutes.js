@@ -3,6 +3,8 @@ const { addExamResult, getUserExamResults } = require('../controllers/examResult
 const { protect } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-router.route('/').post(protect, addExamResult).get(protect, getUserExamResults);
+router.route('/')
+.post(protect, addExamResult)
+.get(protect, getUserExamResults);
 
 module.exports = router;

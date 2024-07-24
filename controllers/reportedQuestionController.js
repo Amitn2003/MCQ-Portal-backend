@@ -9,7 +9,7 @@ const Question = require('../models/questionModel');
 const reportQuestion = asyncHandler(async (req, res) => {
     console.log("Request qs func runn")
     try {
-        console.log(" User is ...", req.body)
+        // console.log(" User is ...", req.body)
         const { questionId, reason } = req.body;
 
         const reportedQuestion = await new ReportedQuestion({
@@ -18,7 +18,7 @@ const reportQuestion = asyncHandler(async (req, res) => {
             reason,
         });
 
-        console.log("Reported question", reportedQuestion);
+        // console.log("Reported question", reportedQuestion);
 
         const createdReportedQuestion = await reportedQuestion.save();
 
