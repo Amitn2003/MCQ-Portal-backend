@@ -37,32 +37,55 @@ const addQuestion = asyncHandler(async (req, res) => {
 //     res.json(questions);
 // });
 const getQuestions = asyncHandler(async (req, res) => {
-    const { category } = req.query;
-    console.log(req.query)
+    // const { category } = req.query;
+    const { category, subcategory } = req.query;
+    console.log(req.query, req.subcategory)
     const totalQuestions = parseInt(req.query.totalQuestions, 10);
     console.log("totalQuestionst", totalQuestions)
-    try {
-        let questions;
+    // try {
+    //     let questions;
 
+    //     if (category) {
+    //         // Fetch all questions of the specified category
+    //         questions = await Question.aggregate([
+    //             { $match: { category: category } }, // Match questions of the specified category
+    //             { $sample: { size: totalQuestions } } // Randomly sample 'totalQuestions' number of questions
+    //         ]);
+    //         // console.log("Qs ",questions)
+    //     } else {
+    //         // Fetch all questions regardless of category
+    //         questions = await Question.aggregate([
+    //             { $sample: { size: totalQuestions } } // Randomly sample 'totalQuestions' number of questions
+    //         ]);
+    //     }
+
+    //     res.json(questions);
+    // } catch (err) {
+    //     // Handle errors
+    //     console.error("Error fetching random questions:", err);
+    //     res.status(500).json({ message: "Failed to fetch random questions." });
+    // }
+    try {
+        let matchCriteria = {};
+        
         if (category) {
-            // Fetch all questions of the specified category
-            questions = await Question.aggregate([
-                { $match: { category: category } }, // Match questions of the specified category
-                { $sample: { size: totalQuestions } } // Randomly sample 'totalQuestions' number of questions
-            ]);
-            // console.log("Qs ",questions)
-        } else {
-            // Fetch all questions regardless of category
-            questions = await Question.aggregate([
-                { $sample: { size: totalQuestions } } // Randomly sample 'totalQuestions' number of questions
-            ]);
+            matchCriteria.category = category;
         }
+
+        if ( subcategory && subcategory != "All") {
+            matchCriteria.subcategory = subcategory;
+        }
+        console.log(matchCriteria)
+
+        let questions = await Question.aggregate([
+            { $match: matchCriteria }, // Match questions based on category and subcategory
+            { $sample: { size: totalQuestions } } // Randomly sample 'totalQuestions' number of questions
+        ]);
 
         res.json(questions);
     } catch (err) {
-        // Handle errors
-        console.error("Error fetching random questions:", err);
-        res.status(500).json({ message: "Failed to fetch random questions." });
+        console.error("Error fetching questions:", err);
+        res.status(500).json({ message: "Failed to fetch questions." });
     }
 });
 
