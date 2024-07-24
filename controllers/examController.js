@@ -237,25 +237,51 @@ const getUserExamAttemptsByDate = asyncHandler(async (req, res) => {
 
 const getAllUsersResults = asyncHandler(async (req, res) => {
     try {
+        console.log("Get all result")
         
         const results = await ExamResult2.find({})
             .populate('user', 'name email')
             .populate('exam');
+        try {
 
-        for (let result of results) {
-            result.exam.questions = await Question.find({ _id: { $in: result.exam.questions } });
+            for (let result of results) {
+                // if (result.exam) { // Check if result.exam is not null
+                //     result.exam.questions = await Question.find({ _id: { $in: result.exam.questions } });
+                // }
+                if (result.exam && Array.isArray(result.exam.questions)) { // Check if questions is an array
+                    result.exam.questions = await Question.find({ _id: { $in: result.exam.questions } });
+                }
+                // result.exam.questions = await Question.find({ _id: { $in: result.exam.questions } });
+            }
         }
-
+        catch {
+            res.json(results);
+        }
         res.json(results);
     } catch (error) {
+        console.log(error)
         res.status(404).json({ message: 'Results not found' });
     }
 });
 
 
 
+// @desc    Get all users' exam results
+// @route   GET /api/examResults
+// @access  Private/Admin
+const getAllUserExamResults = asyncHandler(async (req, res) => {
+    try {
+        // Fetch all exam results and populate user and question details
+        const examResults = await ExamResult.find({})
+            .populate('user', 'name email') // Populate user details
+            .populate('questions.question') // Populate question details
+            .sort({ createdAt: -1 }); // Sort by newest first
 
-
+        res.json(examResults);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch exam results', error });
+    }
+});
 
 
 
@@ -288,4 +314,5 @@ module.exports = {
     getAvailableExams,
     getUserExamAttemptsByDate,
     getAllUsersResults,
+    getAllUserExamResults,
 };

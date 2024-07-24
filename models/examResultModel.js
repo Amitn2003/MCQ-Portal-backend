@@ -8,8 +8,15 @@ const examResultSchema = new mongoose.Schema({
     },
     questions: [
         {
-            question: { type: mongoose.Schema.Types.ObjectId, ref: 'Question', required: true },
-            selectedAnswer: { type: Number, required: true },
+            question: { 
+                type: mongoose.Schema.Types.ObjectId, 
+                ref: 'Question', 
+                required: true 
+            },
+            selectedAnswer: { 
+                type: Number, 
+                required: true 
+            },
         },
     ],
     score: {
