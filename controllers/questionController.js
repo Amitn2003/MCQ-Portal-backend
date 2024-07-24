@@ -29,8 +29,12 @@ const getQuestions = asyncHandler(async (req, res) => {
     // const { category } = req.query;
     const { category, subcategory } = req.query;
     console.log(req.query, req.subcategory)
-    const totalQuestions = parseInt(req.query.totalQuestions, 10);
-    console.log("totalQuestionst", totalQuestions)
+    let totalQuestions = parseInt(req.query.totalQuestions, 10);
+    // If totalQuestions is NaN or not provided, set default to 10
+    if (isNaN(totalQuestions) || totalQuestions <= 0) {
+        totalQuestions = 10;
+    }
+    console.log("totalQuestions", totalQuestions)
     
     try {
         let matchCriteria = {};
