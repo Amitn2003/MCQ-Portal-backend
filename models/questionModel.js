@@ -5,6 +5,9 @@ const questionSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    subcategory:{
+        type: String,
+    },
     question: {
         type: String,
         required: true,

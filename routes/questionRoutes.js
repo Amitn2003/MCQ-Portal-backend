@@ -4,7 +4,8 @@ const {
     getQuestions,
     updateQuestion,
     deleteQuestion,
-    getRandomQuestions
+    getRandomQuestions,
+    getQuestionsSearch
 } = require('../controllers/questionController');
 const { checkExamLimit } = require('../middlewares/examLimitMiddleware');
 const { protect, admin } = require('../middlewares/authMiddleware');
@@ -19,7 +20,9 @@ router.route('/random/:totalQs').get(protect, getRandomQuestions);
 router.route('/')
     .post(protect, admin, addQuestion)
     .get(protect, checkExamLimit, getQuestions);  
-    
+
+router.route("/search")
+    .get(protect, admin, getQuestionsSearch)
 
 router.route('/:id')
     .put(protect, admin, updateQuestion)
