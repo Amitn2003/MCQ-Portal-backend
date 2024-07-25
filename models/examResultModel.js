@@ -31,6 +31,11 @@ const examResultSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    timeTaken: {  // New field for storing time taken
+        type: Number,
+        required: true,
+    },
+    topics: [String],  // New field for storing topics covered
     createdAt: {
         type: Date,
         default: Date.now,

@@ -1,3 +1,4 @@
+// This file will be deleted soon
 const express = require('express');
 const {
     addQuestion,
@@ -17,3 +18,4 @@ router.route('/:id')
     .delete(protect, admin, deleteQuestion);
 
 module.exports = router;
+ 
