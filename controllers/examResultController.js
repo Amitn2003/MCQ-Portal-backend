@@ -61,7 +61,42 @@ const getUserExamResults = asyncHandler(async (req, res) => {
     res.json(examResults);
 });
 
+
+
+
+
+// @desc    Get average time per question for all exams
+// @route   GET /api/examResults/averageTimePerQuestion
+// @access  Private
+const getAverageTimePerQuestion = asyncHandler(async (req, res) => {
+    try {
+        // Find all exam results for the user
+        const examResults = await ExamResult.find({ user: req.user._id });
+
+        // Calculate average time per question for each exam
+        const averageTimes = examResults.map((exam) => {
+            return {
+                examId: exam._id,
+                averageTime: exam.timeTaken / exam.totalQuestions,  // Calculate average time per question
+                createdAt: exam.createdAt,  // Include the date for charting
+            };
+        });
+
+        res.json(averageTimes);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch exam results', error: error.message });
+    }
+});
+
+
+
+
+
+
+
+
 module.exports = {
     addExamResult,
     getUserExamResults,
+    getAverageTimePerQuestion,
 };
