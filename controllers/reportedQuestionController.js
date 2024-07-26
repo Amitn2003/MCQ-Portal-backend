@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const ReportedQuestion = require('../models/reportedQuestionModel');
 const Question = require('../models/questionModel');
+const ExamResult = require('../models/examResultModel');
 // console.log("Reported qs page", ReportedQuestion)
 
 // @desc    Report a question
@@ -72,10 +73,27 @@ const updateReportedQuestionStatus = asyncHandler(async (req, res) => {
 const updateReportedQuestion = asyncHandler(async (req, res) => {
     const reportedQuestion = await ReportedQuestion.findById(req.params.id);
 
+    if (!reportedQuestion) {
+        res.status(404).send('Reported question not found');
+        throw new Error('Reported question not found');
+    }
+
     if (reportedQuestion) {
         reportedQuestion.status = req.body.status || reportedQuestion.status;
 
         const question = await Question.findById(reportedQuestion.question._id);
+
+        if (!question) {
+            res.status(404);
+            throw new Error('Question not found');
+        }
+
+        // Check if the correct answer is changed
+    const originalCorrectAnswer = question.correctAnswer;
+    const isCorrectAnswerChanged = originalCorrectAnswer !== req.body.correctAnswer;
+
+
+
         if (question) {
             question.question = req.body.question || question.question;
             question.options = req.body.options || question.options;
@@ -86,6 +104,17 @@ const updateReportedQuestion = asyncHandler(async (req, res) => {
         }
 
         const updatedReportedQuestion = await reportedQuestion.save();
+
+        // If the correct answer has changed, update all related exam results
+    if (isCorrectAnswerChanged) {
+        await updateExamResultsForQuestion(question._id, question.correctAnswer);
+    }
+
+    // Save the updated reported question
+    //const updatedReportedQuestion = await reportedQuestion.save();
+
+
+    
         res.json(updatedReportedQuestion);
     } else {
         res.status(404);
@@ -93,7 +122,47 @@ const updateReportedQuestion = asyncHandler(async (req, res) => {
     }
 });
 
+// Function to update all exam results for a specific question
+const updateExamResultsForQuestion = async (questionId, newCorrectAnswer) => {
+    try {
+        // Find all exam results containing the updated question
+        const examResults = await ExamResult.find({ 'questions.question': questionId });
+        console.log(examResults)
 
+        // Update each exam result
+        for (const examResult of examResults) {
+            let correctAnswersCount = 0;
+
+            // Recalculate the score and accuracy
+            for (const question of examResult.questions) {
+                if (question.question.toString() === questionId.toString()) {
+                    if (question.selectedAnswer === newCorrectAnswer) {
+                        correctAnswersCount++;
+                    }
+                } else {
+                    const correctOption = await Question.findById(question.question).select('correctAnswer');
+                    if (question.selectedAnswer === correctOption.correctAnswer) {
+                        correctAnswersCount++;
+                    }
+                }
+            }
+
+            // Update the score and accuracy of the exam result
+            examResult.score = correctAnswersCount;
+            examResult.accuracy = (correctAnswersCount / examResult.totalQuestions) * 100;
+
+            // Set a default timeTaken if not already set
+            examResult.timeTaken = examResult.timeTaken || 2;
+            
+            console.log(examResults)
+
+            // Save the updated exam result
+            await examResult.save();
+        }
+    } catch (error) {
+        console.error('Failed to update exam results:', error);
+    }
+};
 
 
 

@@ -1,6 +1,9 @@
 const asyncHandler = require('express-async-handler');
 const Question = require('../models/questionModel');
 const { z } = require('zod');
+const ExamResult = require("../models/examResultModel")
+
+
 
 const questionSchema = z.object({
     category: z.string().min(1),
@@ -117,6 +120,9 @@ const updateQuestion = asyncHandler(async (req, res) => {
             return res.status(404).json({ message: 'Question not found' });
         }
 
+        const originalCorrectAnswer = existingQuestion.correctAnswer;
+        const isCorrectAnswerChanged = originalCorrectAnswer !== correctAnswer;
+
         existingQuestion.question = question;
         existingQuestion.options = options;
         existingQuestion.correctAnswer = correctAnswer;
@@ -125,11 +131,63 @@ const updateQuestion = asyncHandler(async (req, res) => {
         existingQuestion.explanation = explanation;
 
         const updatedQuestion = await existingQuestion.save();
+        // Trigger result update if the correct answer has changed
+        if (isCorrectAnswerChanged) {
+            console.log("answer changed")
+            await updateExamResultsForQuestion(updatedQuestion._id, correctAnswer);
+        }
+        console.log("answer not changed")
+        console.log(updatedQuestion)
         res.json(updatedQuestion);
     } catch (error) {
         res.status(500).json({ message: 'Failed to update question', error: error.message });
     }
 });
+
+
+
+
+// Function to update all exam results for a specific question
+const updateExamResultsForQuestion = async (questionId, newCorrectAnswer) => {
+    try {
+        // Find all exam results containing the updated question
+        const examResults = await ExamResult.find({ 'questions.question': questionId });
+        console.log("Exam result update call", examResults)
+
+        examResults.forEach(async (examResult) => {
+            // Calculate the new score
+            let correctAnswersCount = 0;
+            examResult.questions.forEach(async (question) => {
+                if (question.question.toString() === questionId.toString()) {
+                    // Check if the user's selected answer matches the new correct answer
+                    if (question.selectedAnswer === newCorrectAnswer) {
+                        correctAnswersCount++;
+                    }
+                } else {
+                    // Check if previously correct questions are still correct
+                    const correctOption = await Question.findById(question.question).select('correctAnswer');
+                    if (question.selectedAnswer === correctOption.correctAnswer) {
+                        correctAnswersCount++;
+                    }
+                }
+            });
+
+            // Update score and accuracy
+            examResult.score = correctAnswersCount;
+            examResult.accuracy = (correctAnswersCount / examResult.totalQuestions) * 100;
+
+            // Save updated exam result
+            await examResult.save();
+        });
+        console.log(examResults)
+    } catch (error) {
+        console.error('Failed to update exam results:', error);
+    }
+};
+
+
+
+
 // @desc    Delete a question
 // @route   DELETE /api/questions/:id
 // @access  Private/Admin
