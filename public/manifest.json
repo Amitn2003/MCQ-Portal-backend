@@ -1,0 +1,22 @@
+{
+    "name": "XaMawo",
+    "short_name": "XaMawo",
+    "start_url": "https://mcq-practice.vercel.app/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4a90e2",
+    "description": "The best app for practicing MCQs and mock exams.",
+    "icons": [
+      {
+        "src": "logo.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "logo2.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ]
+  }
+  

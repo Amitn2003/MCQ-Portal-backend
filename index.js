@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const cors = require('cors');
+const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const questionRoutes = require('./routes/questionRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -34,6 +35,18 @@ const PORT = process.env.PORT || 5000;
 
 
 
+app.get('/manifest.json', (req, res) => {
+    res.type('application/manifest+json');
+    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
+  });
+app.get('/logo.png', (req, res) => {
+    // res.type('application/manifest+json');
+    res.sendFile(path.join(__dirname, 'public', 'logo.png'));
+  });
+app.get('/logo2.png', (req, res) => {
+    // res.type('application/manifest+json');
+    res.sendFile(path.join(__dirname, 'public', 'logo2.png'));
+  });
 
 
 
