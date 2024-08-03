@@ -64,29 +64,48 @@ const getUserExamResults = asyncHandler(async (req, res) => {
 
 
 
-
 // @desc    Get average time per question for all exams
 // @route   GET /api/examResults/averageTimePerQuestion
 // @access  Private
 const getAverageTimePerQuestion = asyncHandler(async (req, res) => {
+    const { page = 0 } = req.query; // Get the page number from query, default to 0
+
     try {
-        // Find all exam results for the user
-        const examResults = await ExamResult.find({ user: req.user._id });
+        // Calculate date range for the page
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset to midnight for consistent date comparison
+
+        const endDate = new Date(today -1); // Start of the current 7-day period
+        
+        endDate.setDate(today.getDate() - page * 7);
+
+        const startDate = new Date(endDate); // Start of the previous 7-day period
+        startDate.setDate(endDate.getDate() - 7);
+
+        console.log(`Fetching exams from ${startDate} to ${endDate}`); // Debugging
+
+        // Find all exam results for the user within the calculated date range
+        const examResults = await ExamResult.find({
+            user: req.user._id,
+            createdAt: { $gte: startDate, $lt: endDate }, // Filter by date range
+        }).sort({ createdAt: -1 });
 
         // Calculate average time per question for each exam
-        const averageTimes = examResults.map((exam) => {
-            return {
-                examId: exam._id,
-                averageTime: exam.timeTaken / exam.totalQuestions,  // Calculate average time per question
-                createdAt: exam.createdAt,  // Include the date for charting
-            };
-        });
+        const resultsData = examResults.map((exam) => ({
+            examId: exam._id,
+            averageTime: exam.timeTaken / exam.totalQuestions, // Calculate average time per question
+            score: exam.score, // Include score
+            createdAt: exam.createdAt, // Include the date for charting
+        }));
 
-        res.json(averageTimes);
+        // console.log(resultsData); // Debugging
+
+        res.json(resultsData);
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch exam results', error: error.message });
     }
 });
+
 
 
 
