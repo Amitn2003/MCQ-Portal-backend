@@ -54,11 +54,40 @@ const addExamResult = asyncHandler(async (req, res) => {
 // @route   GET /api/examResults
 // @access  Private
 const getUserExamResults = asyncHandler(async (req, res) => {
-    const examResults = await ExamResult.find({ user: req.user._id })
-    .populate('questions.question')
-    .sort({ createdAt: -1 });
 
-    res.json(examResults);
+    const page = parseInt(req.query.page, 10) || 1; // Current page number
+    const limit = parseInt(req.query.limit, 10) || 10; // Results per page
+    const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
+
+    try {
+        const examResults = await ExamResult.find({ user: req.user._id })
+            .populate('questions.question')
+            .sort({ createdAt: -1 })
+            .skip(skip) // Skip the previous results
+            .limit(limit); // Limit the number of results returned
+
+        const totalResults = await ExamResult.countDocuments({ user: req.user._id }); // Total number of results
+        const totalPages = Math.ceil(totalResults / limit); // Calculate total pages
+
+        res.json({ examResults, totalPages, currentPage: page });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch exam results', error: error.message });
+    }
+
+
+
+
+
+
+
+
+
+    // const examResults = await ExamResult.find({ user: req.user._id })
+    // .populate('questions.question')
+    // .sort({ createdAt: -1 });
+
+    // res.json(examResults);
 });
 
 
