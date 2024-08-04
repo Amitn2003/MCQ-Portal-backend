@@ -138,13 +138,33 @@ const getAverageTimePerQuestion = asyncHandler(async (req, res) => {
 
 
 
-
+// @desc    Get exam result by ID
+// @route   GET /api/examResults/:resultId
+// @access  Private
+const getExamResultById = asyncHandler(async (req, res) => {
+    const { resultId } = req.params;
+  
+    try {
+      const examResult = await ExamResult.findById(resultId)
+        .populate('user', 'name email') // Populate user details (adjust fields as needed)
+        .populate('questions.question'); // Populate questions data
+  
+      if (!examResult) {
+        return res.status(404).json({ message: 'Exam result not found' });
+      }
+  
+      res.json(examResult);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch exam result', error: error.message });
+    }
+  });
 
 
 
 
 module.exports = {
     addExamResult,
+    getExamResultById,
     getUserExamResults,
     getAverageTimePerQuestion,
 };

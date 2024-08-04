@@ -1,5 +1,5 @@
 const express = require('express');
-const { addExamResult, getUserExamResults, getAverageTimePerQuestion  } = require('../controllers/examResultController');
+const { addExamResult, getUserExamResults, getAverageTimePerQuestion ,getExamResultById  } = require('../controllers/examResultController');
 const { protect } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
@@ -9,7 +9,7 @@ router.route('/')
 
 
 router.get('/averageTimePerQuestion', protect, getAverageTimePerQuestion);
-
+router.get('/:resultId', protect, getExamResultById);
 
 
 module.exports = router;
