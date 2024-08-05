@@ -34,4 +34,72 @@ const getUserAnalytics = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { getUserAnalytics };
+
+// @desc    Get user performance by subcategory with pagination
+// @route   GET /api/analytics/subcategory
+// @access  Private
+const getUserPerformanceBySubcategory = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const { page = 0 } = req.query;
+    const itemsPerPage = 7; // Number of days per page
+
+    // Calculate the date range for the requested page
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() - page * itemsPerPage);
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - itemsPerPage);
+
+    try {
+        const examResults = await ExamResult.find({
+            user: userId,
+            createdAt: { $gte: startDate, $lt: endDate },
+        }).populate('questions.question');
+
+        // Aggregate performance data by subcategory
+        const performanceData = {};
+
+        examResults.forEach((result) => {
+            result.questions.forEach((q) => {
+                if (q.question && q.question.subcategory) {
+                    const subcategory = q.question.subcategory;
+
+                    if (!performanceData[subcategory]) {
+                        performanceData[subcategory] = { totalQuestions: 0, correctAnswers: 0 };
+                    }
+
+                    performanceData[subcategory].totalQuestions += 1;
+                    if (q.selectedAnswer === q.question.correctAnswer) {
+                        performanceData[subcategory].correctAnswers += 1;
+                    }
+                }
+            });
+        });
+
+        // Calculate percentage for each subcategory
+        const analytics = Object.keys(performanceData).map((subcategory) => ({
+            subcategory,
+            percentage: (performanceData[subcategory].correctAnswers / performanceData[subcategory].totalQuestions) * 100,
+        }));
+
+        // Calculate total number of pages
+        const totalExamResults = await ExamResult.countDocuments({
+            user: userId,
+            createdAt: { $gte: startDate, $lt: endDate },
+        });
+        const totalPages = Math.ceil(totalExamResults / itemsPerPage);
+
+        res.json({
+            analytics,
+            totalPages,
+            currentPage: Number(page),
+            startDate,
+            endDate,
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch performance data', error: error.message });
+    }
+});
+
+
+
+module.exports = { getUserAnalytics , getUserPerformanceBySubcategory};
