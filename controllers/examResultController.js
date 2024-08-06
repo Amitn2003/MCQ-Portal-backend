@@ -120,12 +120,18 @@ const getAverageTimePerQuestion = asyncHandler(async (req, res) => {
         }).sort({ createdAt: -1 });
 
         // Calculate average time per question for each exam
-        const resultsData = examResults.map((exam) => ({
-            examId: exam._id,
-            averageTime: exam.timeTaken / exam.totalQuestions, // Calculate average time per question
-            score: exam.score, // Include score
-            createdAt: exam.createdAt, // Include the date for charting
-        }));
+        const resultsData = examResults.map((exam) => {
+            // Assuming `totalQuestions` is the total number of questions in the exam
+            // and `score` is the number of correct answers
+            const percentageScore = (exam.score / exam.totalQuestions) * 100; // Calculate percentage
+
+            return {
+                examId: exam._id,
+                averageTime: exam.timeTaken / exam.totalQuestions, // Calculate average time per question
+                percentageScore: percentageScore.toFixed(2), // Include percentage score, rounded to 2 decimal places
+                createdAt: exam.createdAt, // Include the date for charting
+            };
+        });
 
         // console.log(resultsData); // Debugging
 

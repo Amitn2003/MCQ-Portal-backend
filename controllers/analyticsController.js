@@ -40,7 +40,7 @@ const getUserAnalytics = asyncHandler(async (req, res) => {
 // @access  Private
 const getUserPerformanceBySubcategory = asyncHandler(async (req, res) => {
     const userId = req.user._id;
-    const { page = 0 } = req.query;
+    const { page = 0 , category} = req.query;
     const itemsPerPage = 7; // Number of days per page
 
     // Calculate the date range for the requested page
@@ -53,7 +53,10 @@ const getUserPerformanceBySubcategory = asyncHandler(async (req, res) => {
         const examResults = await ExamResult.find({
             user: userId,
             createdAt: { $gte: startDate, $lt: endDate },
-        }).populate('questions.question');
+        }).populate({
+            path: 'questions.question',
+            match: { category }, // Filter questions by category
+        });
 
         // Aggregate performance data by subcategory
         const performanceData = {};
