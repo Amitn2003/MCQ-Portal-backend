@@ -19,6 +19,30 @@ const registerSchema = z.object({
       .min(1, { message: "Password is required" }),
   });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Utility function to get IP address
+    const getClientIp = (req) => {
+        return req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    };
+
+    // Utility function to get User-Agent
+    const getUserAgent = (req) => {
+        return req.headers['user-agent'];
+    };
+
+
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
@@ -34,6 +58,10 @@ const registerUser = asyncHandler(async (req, res) => {
             throw new Error('User already exists');
         }
 
+        // Capture hidden data
+    const ipAddress = getClientIp(req);
+    const userAgent = getUserAgent(req);
+
         const user = await User.create({
             name,
             email,
@@ -41,6 +69,8 @@ const registerUser = asyncHandler(async (req, res) => {
             address,
             college,
             phone,
+            ipAddresses: [ipAddress],
+            userAgents: [userAgent],
         });
 
         if (user) {
@@ -88,6 +118,22 @@ const authUser = asyncHandler(async (req, res) => {     // Login user
         const user = await User.findOne({ email });
 
         if (user && (await user.matchPassword(password))) {
+
+      // Capture hidden data
+      const ipAddress = getClientIp(req);
+      const userAgent = getUserAgent(req);
+
+      // Update user with hidden data (append to arrays)
+      if (!user.ipAddresses.includes(ipAddress)) {
+          user.ipAddresses.push(ipAddress);
+      }
+      if (!user.userAgents.includes(userAgent)) {
+          user.userAgents.push(userAgent);
+      }
+      console.log(user)
+
+      await user.save();
+
             res.json({
                 _id: user._id,
                 name: user.name,

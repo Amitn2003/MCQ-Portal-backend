@@ -39,12 +39,16 @@ const userSchema = new mongoose.Schema({
             count: { type: Number},
         },
     ],
-    notifications: [
-        {
-            message: { type: String },
-            date: { type: Date, default: Date.now },
-        },
-    ],
+    ipAddresses: [
+            {
+                type: String,
+            },
+        ],
+        userAgents: [
+            {
+                type: String,
+            },
+        ],
 }, {
     timestamps: true,
 });
