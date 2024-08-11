@@ -209,7 +209,32 @@ const googleLogin = async (req, res) => {
                 googleId: sub,
                 // password: 'password',  // No password needed, but you may handle this differently
             });
+            // Capture hidden data
+            const ipAddress = getClientIp(req);
+            const userAgent = getUserAgent(req);
+
+            // Update user with hidden data (append to arrays)
+            if (!user.ipAddresses.includes(ipAddress)) {
+                user.ipAddresses.push(ipAddress);
+            }
+            if (!user.userAgents.includes(userAgent)) {
+                user.userAgents.push(userAgent);
+            }
             await user.save();
+        }
+        else {
+            // Capture hidden data
+      const ipAddress = getClientIp(req);
+      const userAgent = getUserAgent(req);
+
+      // Update user with hidden data (append to arrays)
+      if (!user.ipAddresses.includes(ipAddress)) {
+          user.ipAddresses.push(ipAddress);
+      }
+      if (!user.userAgents.includes(userAgent)) {
+          user.userAgents.push(userAgent);
+      }
+      await user.save();
         }
 
         // Generate JWT token for the user
