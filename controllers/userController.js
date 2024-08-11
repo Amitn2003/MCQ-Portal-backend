@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
 const { z } = require('zod');
 const generateToken = require('../utils/generateToken');
+// const bcrypt = require('bcryptjs');
 
 // Schema for profile update validation
 const profileSchema = z.object({
@@ -29,6 +30,11 @@ const getUserProfile = asyncHandler(async (req, res) => {
             name: user.name,
             email: user.email,
             isAdmin: user.isAdmin,
+            avatar: user.avatar,
+            isPremium : user.isPremium,
+            college: user.college,
+            phone: user.phone,
+            address: user.address,
         });
     } else {
         res.status(404);
@@ -41,16 +47,16 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // @access  Private
 const updateUserProfile = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user._id);
-
+    // console.log("Previous user ", user)
     if (user) {
-        const { name, email, password } = profileSchema.parse(req.body);
-
-        user.name = name || user.name;
-        user.email = email || user.email;
-        if (password) {
-            user.password = password;
-        }
-
+        const { name, email, password, college, phone, address } = req.body;
+        // profileSchema.parse(req.body);
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (college) user.college = college;
+        if (phone) user.phone = phone;
+        if (address) user.address = address;
+        if (password) user.password = password;
         const updatedUser = await user.save();
 
         res.json({
@@ -58,7 +64,12 @@ const updateUserProfile = asyncHandler(async (req, res) => {
             name: updatedUser.name,
             email: updatedUser.email,
             isAdmin: updatedUser.isAdmin,
+            isPremium : user.isPremium,
             token: generateToken(updatedUser._id),
+            avatar: updatedUser.avatar,
+            college: updatedUser.college,
+            phone: updatedUser.phone,
+            address: updatedUser.address,
         });
     } else {
         res.status(404);
@@ -108,6 +119,7 @@ const getUserById = asyncHandler(async (req, res) => {
 // @access  Private/Admin
 const updateUser = asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
+    console.log(user)
 
     if (user) {
         // const { name, email, isAdmin } = userUpdateSchema.parse(req.body);

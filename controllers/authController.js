@@ -144,6 +144,7 @@ const authUser = asyncHandler(async (req, res) => {     // Login user
                 isAdmin: user.isAdmin,
                 college: user.college,
                 address: user.address,
+                avatar: user.avatar,
                 phone: user.phone,
                 isPremium : user.isPremium ,
                 token: generateToken(user._id),
