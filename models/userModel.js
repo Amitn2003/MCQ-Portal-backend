@@ -13,7 +13,14 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+    },
+    avatar: {
+        type: String, // URL or path to the user's avatar image
+    },
+    googleId: {
+        type: String, // Unique identifier from Google
+        unique: true, // Ensure this is unique across users
+        sparse: true, // Allows for `googleId` to be missing in some cases
     },
     address : {
         type: String,

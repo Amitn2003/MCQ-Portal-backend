@@ -2,6 +2,9 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
 const generateToken = require('../utils/generateToken');
 const { z } = require('zod');
+const { OAuth2Client } = require('google-auth-library');
+const jwt = require("jsonwebtoken")
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const registerSchema = z.object({
     name: z.string()
@@ -165,7 +168,84 @@ const authUser = asyncHandler(async (req, res) => {     // Login user
     }
 });
 
+
+
+
+
+// @desc    Google login/signup
+// @route   POST /api/auth/google
+// @access  Public
+const googleLogin = async (req, res) => {
+    try {
+        console.log("Req body : ", req.body)
+        const { token } = req.body;
+        console.log(token)
+
+        // Verify the token using Google's OAuth2Client
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        console.log("Ticket : ", ticket)
+        // const userData = {
+        //     name: "Test User",
+        //     email: "testuser@example.com",
+        //     avatar: "https://example.com/avatar.png",
+        //     googleId: "1234567890"
+        // };
+        // let user = await User.findOne({ email: userData.email });
+
+        const { name, email, picture, sub } = ticket.getPayload();
+        
+        // Find the user by email
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            // Create a new user if they don't exist
+            user = new User({
+                name,
+                email,
+                avatar: picture,
+                googleId: sub,
+                // password: 'password',  // No password needed, but you may handle this differently
+            });
+            await user.save();
+        }
+
+        // Generate JWT token for the user
+        // const jwtToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+        //     expiresIn: '30d',
+        // });
+        // user.token = jwtToken;
+        console.log(user)
+        // Generate JWT token for the user
+        // const token = generateToken(user._id);
+
+        // Respond with the specific user details and token
+        res.status(200).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            isAdmin: user.isAdmin,
+            college: user.college,
+            address: user.address,
+            phone: user.phone,
+            avatar: picture,
+            isPremium: user.isPremium,
+            token: generateToken(user._id), // Include the generated token
+            message: 'User logged in successfully',
+        });
+    } catch (error) {
+        console.error('Error during Google login/signup:', error);
+        res.status(500).json({ message: 'Failed to authenticate user' });
+    }
+};
+
+
+
+
 module.exports = {
     registerUser,
     authUser,
+    googleLogin
 };
