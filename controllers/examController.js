@@ -270,14 +270,31 @@ const getAllUsersResults = asyncHandler(async (req, res) => {
 // @route   GET /api/examResults
 // @access  Private/Admin
 const getAllUserExamResults = asyncHandler(async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
     try {
-        // Fetch all exam results and populate user and question details
+        const totalResults = await ExamResult.countDocuments({});
         const examResults = await ExamResult.find({})
-            .populate('user', 'name email') // Populate user details
-            .populate('questions.question') // Populate question details
-            .sort({ createdAt: -1 }); // Sort by newest first
+            .populate('user', 'name email')
+            .populate('questions.question')
+            .sort({ createdAt: -1 })
+            .skip(parseInt(skip))
+            .limit(parseInt(limit));
+        
+        res.json({
+            results: examResults,
+            totalPages: Math.ceil(totalResults / limit),
+        });
 
-        res.json(examResults);
+
+
+        // Fetch all exam results and populate user and question details
+        // const examResults = await ExamResult.find({})
+        //     .populate('user', 'name email') // Populate user details
+        //     .populate('questions.question') // Populate question details
+        //     .sort({ createdAt: -1 }); // Sort by newest first
+
+        // res.json(examResults);
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch exam results', error });
     }
